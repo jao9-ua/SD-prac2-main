@@ -1,0 +1,35 @@
+# SD-Prac2
+- 1º: Instalar KAFKA
+- 2º: Registry / Dron [1 mañana]
+	- Módulo encapsulado por sockets
+	-	El “Registry” va a devolver el token, que se guarda de forma permanente y no caduca.
+	-	Hacer un script por fuera que los registra todos de una. 
+	-	Está desacoplado
+	-	No tiene que ver con el diseño dibujado en la práctica
+	-	Se hace un .a o un Shell para que automáticamente se registren los drones en la BD
+-	3º: Dron / KAFKA / Engine 
+	-	Cuando se ejecute el Engine se tiene que poner por pantalla el número máximo de conexiones concurrentes.
+	-	Hecho eso, saldrá en la pantalla la matriz de 20x20
+	-	En el Engine se muestra siempre la IP y puerto al que se va a conectar
+ 	- El dron le tendré que pasar la ip y el puerto del Engine
+	-	El Engine será consumidor de KAFKA y tiene que retransmitir lo que está recibiendo y si no recibe nada, también se tiene que mostrar por pantalla
+	-	Cuando se ejecutan los 2 a la vez, en las dos pantallas se tienen que mostrar el mapa, que es la matriz en tiempo real con los drones
+	-	El Engine tiene que recibir y mostrar todos los mensaje que va recibiendo en tiempo real
+	-	Dron: Si hay 2 drones ejecutándose a la vez, se tiene que mostrar en el mapa de los 2 drones si uno u otro se está moviendo, esto sucede porque se lo pasas al Engine y esté lo distribuye a los drones y lo muestra.
+	-	Se tienen que poder verse tantas ventanas como drones haya.
+ 	-	 El mapa se visualiza en la terminal con los drones y ver cómo se mueven etc.
+	-	DRON: Productor de movimiento porque envia el movimiento al Engine y consumidor del mapa porque lo recibe del Enfine
+	-	ENGINE es un productor de mapa y un consumidor del movimiento de los drones porque lo recibe
+	-	En KAFKA se crean topics
+-	4º: Dron - Autenticación - Engine
+	-	La autenticación solo es al principio del espectáculo
+-	5º: Engine / Clima
+	-	No hay ciudades
+	-	En el json solo habrá una temperatura que es la que se le devolverá al constantemente al Engine y que se podrá modificar en tiempo real.
+-	6º: Integración
+-	7º: Pruebas de despliegue
+-	8º: Pruebas funcionales
+	-	Todas las pruebas que se van a hacer va a ser para garantizar la escalabilidad y la resiliencia [3.5 puntos]
+	-	EJEMPLO PRUEBA EL DÍA DE LA CORRECCIÓN: Que se intente registrar un dron y de repente desconecte el cable. No tendría que pasar nada, es decir, el dron no dejaría que se registrara pero el programa no tendría que petar
+	-	Todos los errores se tienen que imprimir por pantalla: si se ha perdido la conexión, si ‘x’ dron ha desaparecido, si el clima no responde
+	-	Cuando no hay conexión se tiene que poder tomar una decisión, por ejemplo: volver a la base o continuar 
