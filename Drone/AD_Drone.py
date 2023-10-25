@@ -1,6 +1,7 @@
 import socket
 import json
 import sys
+from kafka import KafkaProducer, KafkaConsumer
 
 def cargar_tokens():
     try:
@@ -8,6 +9,10 @@ def cargar_tokens():
             return json.load(file)
     except FileNotFoundError:
         return {'Drones': {}}
+    
+def obtener_token(id):
+    tokens = cargar_tokens()
+    return tokens['Drones'].get(id)
 
 def guardar_tokens(tokens):
     with open('tokens.json', 'w') as file:
@@ -38,7 +43,7 @@ def registrar_dron(id, alias, registry_host, registry_port):
     return respuesta
 
 # Función para unirse al espectáculo en el AD_Engine
-def unirse_al_espectaculo(id, token, engine_host, engine_port):
+def obtener_coordenadas(id, token, engine_host, engine_port):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((engine_host, engine_port))
 
@@ -49,6 +54,27 @@ def unirse_al_espectaculo(id, token, engine_host, engine_port):
     client_socket.close()
 
     return json.loads(respuesta)
+
+def calcular_mejor_movimiento(pos_actual, pos_objetivo):
+    x_actual, y_actual = pos_actual
+    x_objetivo, y_objetivo = pos_objetivo
+
+    # Calcular la diferencia en coordenadas
+    dx = x_objetivo - x_actual
+    dy = y_objetivo - y_actual
+
+    # Elegir el siguiente movimiento en base a la diferencia
+    if dx > 0 and dy == 0:
+        return (x_actual + 1, y_actual)
+    elif dx > 0 and dy < 0:
+        return (x_actual + 1, y_actual - 1)
+    elif dx == 0 and dy < 0:
+        return (x_actual, y_actual - 1)
+    else:
+        return pos_actual  # No hay necesidad de moverse
+
+def mover_dron(id, pos_actual, pos_objetivo):
+    return calcular_mejor_movimiento(pos_actual, pos_objetivo)
 
 def menu(host, port):
     print("Menú de opciones:")
@@ -63,9 +89,20 @@ def menu(host, port):
         print(respuesta)
     elif opcion == '2':
         id = input("Ingrese el ID del dron: ")
-        token = input("Ingrese el token de acceso: ")
-        respuesta = unirse_al_espectaculo(id, token, host, port)
-        print(respuesta)
+        token = obtener_token(id)
+
+        if token:
+            coordenadas = obtener_coordenadas(id, token, host, port)
+            if 'coordenadas' in coordenadas:
+                print(f"Coordenadas recibidas: {coordenadas['coordenadas']}")
+                nueva_posicion=(0,0)
+                # Simular movimiento del dron
+                nueva_posicion = mover_dron(id, nueva_posicion, coordenadas['coordenadas'])
+                print(f"Nueva posición del dron: {nueva_posicion}")
+            else:
+                print("Error al obtener coordenadas del AD_Engine")
+        else:
+            print(f"No se encontró un token para el ID {id}")
     else:
         print("Opción no válida")
 
